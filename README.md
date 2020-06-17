@@ -108,7 +108,7 @@ SELECT FIRST_NAME, LAST_NAME, COMMISSION_PCT FROM EMPLOYEES WHERE COMMISSION_PCT
 Sélection de : first_name, last_name et commission_pct au format « 0,xx » pour les employés ayant une commission.
 
 ```
-SELECT FIRST_NAME, LAST_NAME, TO_CHAR(COMMISSION_PCT, '0.99') FROM EMPLOYEES WHERE COMMISSION_PCT IS NOT NULL;
+SELECT FIRST_NAME, LAST_NAME, TO_CHAR(COMMISSION_PCT, '0D00') FROM EMPLOYEES WHERE COMMISSION_PCT IS NOT NULL;
 ```
 
 > Remarque : avec '0,99', toutes les valeurs étaient amenées à 0,00. Une solution ?
@@ -264,4 +264,112 @@ Sélection des locations dont le code postal n'a que des chiffres
 
 ```
 SELECT * FROM LOCATIONS WHERE REGEXP_LIKE(POSTAL_CODE, '^[0-9]+$');
+```
+
+### 25)
+
+Sélection des locations dont leur nom de ville est composé de plusieurs mots
+
+```
+SELECT * FROM LOCATIONS
+WHERE CITY LIKE '% %' ;
+```
+
+ <hr/>
+
+# TP3 (Jointures)
+
+## 3.1 Produit cartésien
+
+### 1)
+
+Sélection de : toutes les colonnes du produit catésien de COUNTRIES et de REGIONS.
+
+```
+SELECT * FROM COUNTRIES, REGIONS;
+```
+
+## 3.2 Jointures simple (équijointures)
+
+### 1)
+
+Sélection de : nom du pays et du nom de sa régions pour tous les pays de COUNTRIES.
+
+```
+SELECT c.COUNTRY_NAME, r.REGION_NAME
+FROM COUNTRIES c, REGIONS r
+WHERE c.REGION_ID = r.REGION_ID;
+```
+
+### 2)
+
+Sélection de : nom de la ville, nom du pays et du nom de sa régions pour toutes les villes de LOCATIONS.
+
+```
+SELECT l.CITY, c.COUNTRY_NAME, r.REGION_NAME
+FROM LOCATIONS l
+INNER JOIN COUNTRIES c
+  ON l.COUNTRY_ID = c.COUNTRY_ID
+INNER JOIN REGIONS r
+  ON c.REGION_ID = r.REGION_ID
+;
+```
+
+### 3)
+
+Sélection de : nom du département et du nom de sa régions pour tous les départements de DEPARTMENTS.
+
+```
+SELECT d.DEPARTMENT_NAME, r.REGION_NAME
+FROM DEPARTMENTS d
+INNER JOIN LOCATIONS l
+  ON d.LOCATION_ID = l.LOCATION_ID
+INNER JOIN COUNTRIES c
+  ON c.COUNTRY_ID = l.COUNTRY_ID
+INNER JOIN REGIONS r
+  ON r.REGION_ID = c.REGION_ID
+;
+```
+
+### 4)
+
+Sélection de : nom du département et du nom de sa ville pour tous les départements de DEPARTMENTS.
+
+```
+SELECT d.DEPARTMENT_NAME, l.CITY
+FROM DEPARTMENTS d
+INNER JOIN LOCATIONS l
+  ON d.LOCATION_ID = l.LOCATION_ID
+;
+```
+
+### 3.3 Jointures externes
+
+### 1)
+
+Sélection de : nom département, nom de sa ville et nom de son manager, s'il existe, pour tous les départements de DEPARTMENTS
+
+```
+SELECT d.DEPARTMENT_NAME, l.CITY, e.LAST_NAME
+FROM DEPARTMENTS d
+INNER JOIN LOCATIONS l
+  ON d.LOCATION_ID = l.LOCATION_ID
+LEFT OUTER JOIN EMPLOYEES e
+  ON d.MANAGER_ID = e.EMPLOYEE_ID
+;
+```
+
+### 2)
+
+Sélection de : nom région, titre de job s'il existe, pour tous les régions de REGIONS. Si une région n'a pas de job retourner la région , ‘pas de job'
+
+```
+SELECT DISTINCT(REGION_NAME), NVL(JOB_TITLE, 'Pas de Job !')
+FROM JOBS
+  LEFT JOIN EMPLOYEES ON JOBS.JOB_ID = EMPLOYEES.JOB_ID
+  INNER JOIN DEPARTMENTS ON EMPLOYEES.DEPARTMENT_ID = DEPARTMENTS.DEPARTMENT_ID
+  INNER JOIN LOCATIONS ON DEPARTMENTS.LOCATION_ID = LOCATIONS.LOCATION_ID
+  INNER JOIN COUNTRIES ON LOCATIONS.COUNTRY_ID = COUNTRIES.COUNTRY_ID
+  FULL OUTER JOIN REGIONS ON COUNTRIES.REGION_ID = REGIONS.REGION_ID
+;
 ```
