@@ -107,7 +107,7 @@ SELECT FIRST_NAME, LAST_NAME, COMMISSION_PCT FROM EMPLOYEES WHERE COMMISSION_PCT
 
 Sélection de : first_name, last_name et commission_pct au format « 0,xx » pour les employés ayant une commission.
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME, TO_CHAR(COMMISSION_PCT, '0D00') FROM EMPLOYEES WHERE COMMISSION_PCT IS NOT NULL;
 ```
 
@@ -223,7 +223,7 @@ SELECT FIRST_NAME, LAST_NAME, UPPER(SUBSTR(FIRST_NAME, 0, 1) || SUBSTR(LAST_NAME
 
 Sélection pour de tous les employés ayant 2 e de suite « ee » dans leur nom ou leur prénom.
 
-```
+```sql
 SELECT * FROM EMPLOYEES WHERE FIRST_NAME LIKE ('%ee%') OR LAST_NAME LIKE('%ee%');
 ```
 
@@ -231,7 +231,7 @@ SELECT * FROM EMPLOYEES WHERE FIRST_NAME LIKE ('%ee%') OR LAST_NAME LIKE('%ee%')
 
 Sélection du nom et prénom des employés avec pour les noms la première et dernière lettre en clair et les autres remplacées par « \* ».
 
-```
+```sql
 SELECT
   SUBSTR(LAST_NAME, 0, 1) || REPLACE(LAST_NAME, SUBSTR(LAST_NAME, 1, LENGTH(LAST_NAME)), '*') || SUBSTR(LAST_NAME, -1, 1) AS LAST_NAME,
   SUBSTR(FIRST_NAME , 0, 1) || REPLACE(FIRST_NAME, SUBSTR(FIRST_NAME, 1, LENGTH(FIRST_NAME)), '*') || SUBSTR(FIRST_NAME , -1, 1) AS FIRST_NAME
@@ -242,7 +242,7 @@ FROM EMPLOYEES;
 
 Sélection pour du nom et prénom des employés qui ont le même nombre de lettres dans leur nom que dans leur prénom.
 
-```
+```sql
 SELECT LAST_NAME, FIRST_NAME FROM EMPLOYEES WHERE LENGTH(LAST_NAME) = LENGTH(FIRST_NAME);
 ```
 
@@ -254,7 +254,7 @@ SELECT LAST_NAME, FIRST_NAME FROM EMPLOYEES WHERE LENGTH(LAST_NAME) = LENGTH(FIR
 
 Sélection pour du nom et prénom des employés qui ont moins 2 l (lettre L) dans leur nom et prénom
 
-```
+```sql
 SELECT * FROM EMPLOYEES WHERE (LENGTH(FIRST_NAME) - LENGTH(REPLACE(FIRST_NAME, 'l', ''))) + (LENGTH(LAST_NAME) - LENGTH(REPLACE(LAST_NAME, 'l', ''))) < 2;
 ```
 
@@ -262,7 +262,7 @@ SELECT * FROM EMPLOYEES WHERE (LENGTH(FIRST_NAME) - LENGTH(REPLACE(FIRST_NAME, '
 
 Sélection des locations dont le code postal n'a que des chiffres
 
-```
+```sql
 SELECT * FROM LOCATIONS WHERE REGEXP_LIKE(POSTAL_CODE, '^[0-9]+$');
 ```
 
@@ -270,7 +270,7 @@ SELECT * FROM LOCATIONS WHERE REGEXP_LIKE(POSTAL_CODE, '^[0-9]+$');
 
 Sélection des locations dont leur nom de ville est composé de plusieurs mots
 
-```
+```sql
 SELECT * FROM LOCATIONS
 WHERE CITY LIKE '% %' ;
 ```
@@ -285,7 +285,7 @@ WHERE CITY LIKE '% %' ;
 
 Sélection de : toutes les colonnes du produit catésien de COUNTRIES et de REGIONS.
 
-```
+```sql
 SELECT * FROM COUNTRIES, REGIONS;
 ```
 
@@ -295,7 +295,7 @@ SELECT * FROM COUNTRIES, REGIONS;
 
 Sélection de : nom du pays et du nom de sa régions pour tous les pays de COUNTRIES.
 
-```
+```sql
 SELECT c.COUNTRY_NAME, r.REGION_NAME
 FROM COUNTRIES c, REGIONS r
 WHERE c.REGION_ID = r.REGION_ID;
@@ -305,7 +305,7 @@ WHERE c.REGION_ID = r.REGION_ID;
 
 Sélection de : nom de la ville, nom du pays et du nom de sa régions pour toutes les villes de LOCATIONS.
 
-```
+```sql
 SELECT l.CITY, c.COUNTRY_NAME, r.REGION_NAME
 FROM LOCATIONS l
 INNER JOIN COUNTRIES c
@@ -319,7 +319,7 @@ INNER JOIN REGIONS r
 
 Sélection de : nom du département et du nom de sa régions pour tous les départements de DEPARTMENTS.
 
-```
+```sql
 SELECT d.DEPARTMENT_NAME, r.REGION_NAME
 FROM DEPARTMENTS d
 INNER JOIN LOCATIONS l
@@ -335,7 +335,7 @@ INNER JOIN REGIONS r
 
 Sélection de : nom du département et du nom de sa ville pour tous les départements de DEPARTMENTS.
 
-```
+```sql
 SELECT d.DEPARTMENT_NAME, l.CITY
 FROM DEPARTMENTS d
 INNER JOIN LOCATIONS l
@@ -349,7 +349,7 @@ INNER JOIN LOCATIONS l
 
 Sélection de : nom département, nom de sa ville et nom de son manager, s'il existe, pour tous les départements de DEPARTMENTS
 
-```
+```sql
 SELECT d.DEPARTMENT_NAME, l.CITY, e.LAST_NAME
 FROM DEPARTMENTS d
 INNER JOIN LOCATIONS l
@@ -363,7 +363,7 @@ LEFT OUTER JOIN EMPLOYEES e
 
 Sélection de : nom région, titre de job s'il existe, pour tous les régions de REGIONS. Si une région n'a pas de job retourner la région , ‘pas de job'
 
-```
+```sql
 SELECT DISTINCT(REGION_NAME), NVL(JOB_TITLE, 'Pas de Job !')
 FROM JOBS
   LEFT JOIN EMPLOYEES ON JOBS.JOB_ID = EMPLOYEES.JOB_ID
@@ -380,7 +380,7 @@ FROM JOBS
 
 Sélection de : prénom, nom et nom du manager pour tous les employés de EMPLOYEES ayant un salaire < 2500
 
-```
+```sql
 SELECT E.FIRST_NAME, E.LAST_NAME, M.FIRST_NAME
 FROM EMPLOYEES E
 INNER JOIN EMPLOYEES M
@@ -396,7 +396,7 @@ WHERE E.SALARY < 2500;
 
 Sélection du salaire moyen de l'ensemble des employés de EMPLOYEES
 
-```
+```sql
 SELECT ROUND(AVG(SALARY),2) as "Salaire moyen" FROM EMPLOYEES;
 ```
 
@@ -404,7 +404,7 @@ SELECT ROUND(AVG(SALARY),2) as "Salaire moyen" FROM EMPLOYEES;
 
 Sélection de : nom de département, salaire moyen des employés pour tous les départements de DEPARTMENTS
 
-```
+```sql
 SELECT d.DEPARTMENT_NAME as "Département", NVL(ROUND(AVG(SALARY)), 0) as "Salaire moyen", COUNT(e.EMPLOYEE_ID) as "Nombre d''employés"
 FROM DEPARTMENTS d
 LEFT JOIN EMPLOYEES e
@@ -417,7 +417,7 @@ ORDER BY d.DEPARTMENT_NAME;
 
 Sélection de : nom de département, nom de fonction, nombre d'employés pour la fonction pour les départements de DEPARTMENTS et les fonctions de JOBS ayant des employés
 
-```
+```sql
 SELECT  d.DEPARTMENT_NAME as "Département", j.JOB_TITLE as "Métier", COUNT(e.EMPLOYEE_ID) as "Nombre d'employés"
 FROM JOBS j
 INNER JOIN EMPLOYEES e
@@ -433,7 +433,7 @@ ORDER BY d.DEPARTMENT_NAME
 
 Sélection de : nom de la ville, le salaire minimum, le salaire maximum, nombre d'employés pour toutes les villes de LOCATIONS ayant des employés
 
-```
+```sql
 SELECT l.CITY as "Ville", MIN(e.SALARY) as "Salaire minimum", MAX(e.SALARY) as "Salaire maximum"
 FROM LOCATIONS l
 INNER JOIN DEPARTMENTS d
@@ -450,7 +450,7 @@ GROUP BY l.CITY
 
 Sélection de : nom de la ville, le salaire minimum, le salaire maximum, le salaire moyen arrondi à l'unité pour toutes les villes de LOCATIONS ayant au moins 5 employés.
 
-```
+```sql
 SELECT l.CITY as "Ville", MIN(e.SALARY) as "Salaire minimum", MAX(e.SALARY) as "Salaire maximum", ROUND(AVG(e.SALARY)) as "Salaire moyen"
 FROM LOCATIONS l
 INNER JOIN DEPARTMENTS d
@@ -466,7 +466,7 @@ HAVING COUNT(e.EMPLOYEE_ID) >= 5
 
 Sélection de : nom du manager, nom de la fonction des employés, commission moyenne arrondie à l'unité pour tous les manager des employés de EMPLOYEES ayant une commission et chaque fonction de JOBS de ces employés.
 
-```
+```sql
 SELECT
   m.LAST_NAME as "Manager",
   j.JOB_TITLE as "Métier",
@@ -485,7 +485,7 @@ GROUP BY m.LAST_NAME, j.JOB_TITLE
 
 Sélection de : prénom, nom des employés de EMPLOYEES ayant changés de fonction (indiqués dans JOB_HISTORY)
 
-```
+```sql
 SELECT DISTINCT e.FIRST_NAME, e.LAST_NAME
 FROM EMPLOYEES e
 INNER JOIN JOB_HISTORY j
@@ -497,7 +497,7 @@ INNER JOIN JOB_HISTORY j
 
 Sélection de : ville, nom du manager, % de commission moyenne des employés de EMPLOYEES par villes et managers dont les subordonnées ont une commission.
 
-```
+```sql
 SELECT l.CITY, m.LAST_NAME, (ROUND(AVG(e.COMMISSION_PCT), 2) * 100) || '%' as "Commission moyenne"
 FROM EMPLOYEES e
 INNER JOIN EMPLOYEES m
@@ -515,7 +515,7 @@ GROUP BY m.LAST_NAME, l.CITY
 
 Sélection de : Pays, Nom du manager, Nombre d'employés des managers de EMPLOYEES par managers et pays hors « US ».
 
-```
+```sql
 SELECT c.COUNTRY_ID, m.LAST_NAME, COUNT(e.EMPLOYEE_ID) as "Nombre d'employés"
 FROM LOCATIONS l
 INNER JOIN DEPARTMENTS d
@@ -539,7 +539,7 @@ HAVING c.COUNTRY_ID != 'US'
 
 Sélection first_name, last_name des employés de EMPLOYEES ayant le plus petit salaire
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME
 FROM EMPLOYEES
 WHERE SALARY = (SELECT MIN(SALARY) FROM EMPLOYEES);
@@ -549,7 +549,7 @@ WHERE SALARY = (SELECT MIN(SALARY) FROM EMPLOYEES);
 
 Sélection first_name, last_name des employés de EMPLOYEES qui sont managers
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME
 FROM EMPLOYEES
 WHERE EMPLOYEE_ID IN (SELECT DISTINCT(MANAGER_ID) FROM EMPLOYEES);
@@ -559,7 +559,7 @@ WHERE EMPLOYEE_ID IN (SELECT DISTINCT(MANAGER_ID) FROM EMPLOYEES);
 
 Sélection de : first_name, last_name des employés de EMPLOYEES ayant le même last_name.
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME
 FROM EMPLOYEES
 WHERE LAST_NAME IN (SELECT LAST_NAME FROM EMPLOYEES GROUP BY LAST_NAME HAVING COUNT(*) > 1);
@@ -569,7 +569,7 @@ WHERE LAST_NAME IN (SELECT LAST_NAME FROM EMPLOYEES GROUP BY LAST_NAME HAVING CO
 
 Sélection de : prénom, nom, fonction, précédente fonction des employés de EMPLOYEES ayant changés de fonction (indiqués dans JOB_HISTORY)
 
-```
+```sql
 SELECT e.FIRST_NAME, e.LAST_NAME, e.JOB_ID, h.JOB_ID
 FROM EMPLOYEES e
 INNER JOIN JOB_HISTORY h
@@ -589,7 +589,7 @@ WHERE END_DATE =
 
 Sélection first_name, last_name, salaire des employés de EMPLOYEES ayant le plus petit salaire ou le plus gros salaire
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME, SALARY
 FROM EMPLOYEES
 JOIN
@@ -608,7 +608,7 @@ JOIN
 
 Sélection de : prénom, nom, fonction, précédente fonction des employés de EMPLOYEES ayant changés de fonction (indiqués dans JOB_HISTORY)
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME, job_actuel.JOB_TITLE, job_precedent.JOB_TITLE
 FROM JOB_HISTORY h
 JOIN EMPLOYEES e ON e.EMPLOYEE_ID = h.EMPLOYEE_ID
@@ -628,7 +628,7 @@ ON precedent.EMPLOYEE_ID = e.EMPLOYEE_ID AND precedent.max_date = h.END_DATE
 
 Sélection first_name, last_name des employés de EMPLOYEES qui sont managers
 
-```
+```sql
 SELECT e.FIRST_NAME, e.LAST_NAME
 FROM EMPLOYEES e
 JOIN
@@ -649,7 +649,7 @@ ON e.EMPLOYEE_ID = manager.MANAGER_ID
 
 Sélection pour tous les employés : first_name, last_name et salaire + commission ordonnés par nom
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME, (SALARY+NVL((SALARY*COMMISSION_PCT),0)) as "Salaire total"
 FROM EMPLOYEES
 ORDER BY LAST_NAME;
@@ -659,7 +659,7 @@ ORDER BY LAST_NAME;
 
 Sélection pour tous les employés : first_name, last_name, nom de département ordonnés par nom de département, nom et prénom
 
-```
+```sql
 SELECT DEPARTMENT_NAME, FIRST_NAME, LAST_NAME
 FROM EMPLOYEES e
 JOIN DEPARTMENTS d
@@ -671,7 +671,7 @@ ORDER BY DEPARTMENT_NAME, LAST_NAME, FIRST_NAME;
 
 Sélection first_name, last_name des employés de EMPLOYEES qui sont managers ordonnés par salaire + commission décroissant
 
-```
+```sql
 SELECT FIRST_NAME, LAST_NAME
 FROM EMPLOYEES
 WHERE EMPLOYEE_ID IN (SELECT DISTINCT(MANAGER_ID) FROM EMPLOYEES)
@@ -690,7 +690,7 @@ Sélection de : first_name, last_name, salaire des employés de EMPLOYEES ayant 
 
 Sélection pour les fonctions des employés ayant changés de fonctions de : nom, fonction, date début, date de fin le tout ordonné par nom, date début
 
-```
+```sql
 SELECT e.LAST_NAME, j.JOB_TITLE, h.START_DATE, h.END_DATE
 FROM EMPLOYEES e
 INNER JOIN JOB_HISTORY h
@@ -706,7 +706,7 @@ ORDER BY e.LAST_NAME, h.START_DATE;
 
 Sélection de : level, nom, prénom de tous les employés de EMPLOYEES :
 
-```
+```sql
 SELECT LEVEL, LAST_NAME, FIRST_NAME
 from employees
 -- On détermine le côté parent de la relation (le parent est employee_id)
