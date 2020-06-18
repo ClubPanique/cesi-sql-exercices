@@ -373,3 +373,368 @@ FROM JOBS
   FULL OUTER JOIN REGIONS ON COUNTRIES.REGION_ID = REGIONS.REGION_ID
 ;
 ```
+
+## 3.4) Auto-jointures
+
+### 1)
+
+Sélection de : prénom, nom et nom du manager pour tous les employés de EMPLOYEES ayant un salaire < 2500
+
+```
+SELECT E.FIRST_NAME, E.LAST_NAME, M.FIRST_NAME
+FROM EMPLOYEES E
+INNER JOIN EMPLOYEES M
+  ON E.MANAGER_ID = M.EMPLOYEE_ID
+WHERE E.SALARY < 2500;
+```
+
+# TP4 (Regroupements)
+
+## 4.1 Requêtes de regroupement
+
+### 1)
+
+Sélection du salaire moyen de l'ensemble des employés de EMPLOYEES
+
+```
+SELECT ROUND(AVG(SALARY),2) as "Salaire moyen" FROM EMPLOYEES;
+```
+
+### 2)
+
+Sélection de : nom de département, salaire moyen des employés pour tous les départements de DEPARTMENTS
+
+```
+SELECT d.DEPARTMENT_NAME as "Département", NVL(ROUND(AVG(SALARY)), 0) as "Salaire moyen", COUNT(e.EMPLOYEE_ID) as "Nombre d''employés"
+FROM DEPARTMENTS d
+LEFT JOIN EMPLOYEES e
+  ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+GROUP BY d.DEPARTMENT_NAME
+ORDER BY d.DEPARTMENT_NAME;
+```
+
+### 3)
+
+Sélection de : nom de département, nom de fonction, nombre d'employés pour la fonction pour les départements de DEPARTMENTS et les fonctions de JOBS ayant des employés
+
+```
+SELECT  d.DEPARTMENT_NAME as "Département", j.JOB_TITLE as "Métier", COUNT(e.EMPLOYEE_ID) as "Nombre d'employés"
+FROM JOBS j
+INNER JOIN EMPLOYEES e
+  ON j.JOB_ID = e.JOB_ID
+INNER JOIN DEPARTMENTS d
+  ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+GROUP BY j.JOB_TITLE, d.DEPARTMENT_NAME
+ORDER BY d.DEPARTMENT_NAME
+;
+```
+
+### 4)
+
+Sélection de : nom de la ville, le salaire minimum, le salaire maximum, nombre d'employés pour toutes les villes de LOCATIONS ayant des employés
+
+```
+SELECT l.CITY as "Ville", MIN(e.SALARY) as "Salaire minimum", MAX(e.SALARY) as "Salaire maximum"
+FROM LOCATIONS l
+INNER JOIN DEPARTMENTS d
+  ON d.LOCATION_ID = l.LOCATION_ID
+INNER JOIN EMPLOYEES e
+  ON d.DEPARTMENT_ID = e.DEPARTMENT_ID
+GROUP BY l.CITY
+;
+```
+
+## 4.2 Filtrage de regroupements
+
+### 1)
+
+Sélection de : nom de la ville, le salaire minimum, le salaire maximum, le salaire moyen arrondi à l'unité pour toutes les villes de LOCATIONS ayant au moins 5 employés.
+
+```
+SELECT l.CITY as "Ville", MIN(e.SALARY) as "Salaire minimum", MAX(e.SALARY) as "Salaire maximum", ROUND(AVG(e.SALARY)) as "Salaire moyen"
+FROM LOCATIONS l
+INNER JOIN DEPARTMENTS d
+  ON l.LOCATION_ID = d.LOCATION_ID
+INNER JOIN EMPLOYEES e
+  ON d.DEPARTMENT_ID = e.DEPARTMENT_ID
+GROUP BY l.CITY
+HAVING COUNT(e.EMPLOYEE_ID) >= 5
+;
+```
+
+### 2)
+
+Sélection de : nom du manager, nom de la fonction des employés, commission moyenne arrondie à l'unité pour tous les manager des employés de EMPLOYEES ayant une commission et chaque fonction de JOBS de ces employés.
+
+```
+SELECT
+  m.LAST_NAME as "Manager",
+  j.JOB_TITLE as "Métier",
+  ROUND(AVG(e.COMMISSION_PCT*e.SALARY)) as "Commission moyenne"
+FROM EMPLOYEES e
+INNER JOIN EMPLOYEES m
+  ON e.MANAGER_ID = m.EMPLOYEE_ID
+INNER JOIN JOBS j
+  ON e.JOB_ID = j.JOB_ID
+WHERE e.COMMISSION_PCT IS NOT NULL
+GROUP BY m.LAST_NAME, j.JOB_TITLE
+;
+```
+
+### 3)
+
+Sélection de : prénom, nom des employés de EMPLOYEES ayant changés de fonction (indiqués dans JOB_HISTORY)
+
+```
+SELECT DISTINCT e.FIRST_NAME, e.LAST_NAME
+FROM EMPLOYEES e
+INNER JOIN JOB_HISTORY j
+  ON e.EMPLOYEE_ID = j.EMPLOYEE_ID
+;
+```
+
+### 4)
+
+Sélection de : ville, nom du manager, % de commission moyenne des employés de EMPLOYEES par villes et managers dont les subordonnées ont une commission.
+
+```
+SELECT l.CITY, m.LAST_NAME, (ROUND(AVG(e.COMMISSION_PCT), 2) * 100) || '%' as "Commission moyenne"
+FROM EMPLOYEES e
+INNER JOIN EMPLOYEES m
+  ON e.MANAGER_ID = m.EMPLOYEE_ID
+INNER JOIN DEPARTMENTS d
+  ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+INNER JOIN LOCATIONS l
+  ON d.LOCATION_ID = l.LOCATION_ID
+WHERE e.COMMISSION_PCT IS NOT NULL
+GROUP BY m.LAST_NAME, l.CITY
+;
+```
+
+### 5)
+
+Sélection de : Pays, Nom du manager, Nombre d'employés des managers de EMPLOYEES par managers et pays hors « US ».
+
+```
+SELECT c.COUNTRY_ID, m.LAST_NAME, COUNT(e.EMPLOYEE_ID) as "Nombre d'employés"
+FROM LOCATIONS l
+INNER JOIN DEPARTMENTS d
+  ON l.LOCATION_ID = d.LOCATION_ID
+INNER JOIN COUNTRIES c
+  ON l.COUNTRY_ID = c.COUNTRY_ID
+INNER JOIN EMPLOYEES m
+  ON m.DEPARTMENT_ID = d.DEPARTMENT_ID
+INNER JOIN EMPLOYEES e
+  ON e.MANAGER_ID = m.EMPLOYEE_ID
+GROUP BY m.LAST_NAME, c.COUNTRY_ID
+HAVING c.COUNTRY_ID != 'US'
+;
+```
+
+# TP5 (Sous-requêtes)
+
+## 5.1 Sous requête dans la clause WHERE
+
+### 1)
+
+Sélection first_name, last_name des employés de EMPLOYEES ayant le plus petit salaire
+
+```
+SELECT FIRST_NAME, LAST_NAME
+FROM EMPLOYEES
+WHERE SALARY = (SELECT MIN(SALARY) FROM EMPLOYEES);
+```
+
+### 2)
+
+Sélection first_name, last_name des employés de EMPLOYEES qui sont managers
+
+```
+SELECT FIRST_NAME, LAST_NAME
+FROM EMPLOYEES
+WHERE EMPLOYEE_ID IN (SELECT DISTINCT(MANAGER_ID) FROM EMPLOYEES);
+```
+
+### 3)
+
+Sélection de : first_name, last_name des employés de EMPLOYEES ayant le même last_name.
+
+```
+SELECT FIRST_NAME, LAST_NAME
+FROM EMPLOYEES
+WHERE LAST_NAME IN (SELECT LAST_NAME FROM EMPLOYEES GROUP BY LAST_NAME HAVING COUNT(*) > 1);
+```
+
+### 4)
+
+Sélection de : prénom, nom, fonction, précédente fonction des employés de EMPLOYEES ayant changés de fonction (indiqués dans JOB_HISTORY)
+
+```
+SELECT e.FIRST_NAME, e.LAST_NAME, e.JOB_ID, h.JOB_ID
+FROM EMPLOYEES e
+INNER JOIN JOB_HISTORY h
+  ON e.EMPLOYEE_ID = h.EMPLOYEE_ID
+WHERE END_DATE =
+(
+  SELECT MAX(END_DATE)
+  FROM JOB_HISTORY
+  WHERE EMPLOYEE_ID = h.EMPLOYEE_ID
+)
+;
+```
+
+## 5.2 Sous requêtes dans la clause FROM
+
+### 1)
+
+Sélection first_name, last_name, salaire des employés de EMPLOYEES ayant le plus petit salaire ou le plus gros salaire
+
+```
+SELECT FIRST_NAME, LAST_NAME, SALARY
+FROM EMPLOYEES
+JOIN
+(
+  SELECT
+    MIN(SALARY) salaire_min,
+    MAX(SALARY) salaire_max
+  FROM EMPLOYEES
+) salaires
+  ON SALARY = salaires.salaire_min
+  OR SALARY = salaires.salaire_max
+;
+```
+
+### 2)
+
+Sélection de : prénom, nom, fonction, précédente fonction des employés de EMPLOYEES ayant changés de fonction (indiqués dans JOB_HISTORY)
+
+```
+SELECT FIRST_NAME, LAST_NAME, job_actuel.JOB_TITLE, job_precedent.JOB_TITLE
+FROM JOB_HISTORY h
+JOIN EMPLOYEES e ON e.EMPLOYEE_ID = h.EMPLOYEE_ID
+JOIN JOBS job_actuel ON e.JOB_ID = job_actuel.JOB_ID
+JOIN JOBS job_precedent ON e.JOB_ID = job_precedent.JOB_ID
+JOIN
+(
+  SELECT EMPLOYEE_ID, MAX(end_date) max_date
+  FROM JOB_HISTORY
+  GROUP BY EMPLOYEE_ID
+) precedent
+ON precedent.EMPLOYEE_ID = e.EMPLOYEE_ID AND precedent.max_date = h.END_DATE
+;
+```
+
+### 3)
+
+Sélection first_name, last_name des employés de EMPLOYEES qui sont managers
+
+```
+SELECT e.FIRST_NAME, e.LAST_NAME
+FROM EMPLOYEES e
+JOIN
+(
+  SELECT MANAGER_ID, COUNT(EMPLOYEE_ID)
+  FROM EMPLOYEES
+  GROUP BY MANAGER_ID
+) manager
+ON e.EMPLOYEE_ID = manager.MANAGER_ID
+;
+```
+
+# TP6 (Tris)
+
+## 6.1
+
+### 1)
+
+Sélection pour tous les employés : first_name, last_name et salaire + commission ordonnés par nom
+
+```
+SELECT FIRST_NAME, LAST_NAME, (SALARY+NVL((SALARY*COMMISSION_PCT),0)) as "Salaire total"
+FROM EMPLOYEES
+ORDER BY LAST_NAME;
+```
+
+### 2)
+
+Sélection pour tous les employés : first_name, last_name, nom de département ordonnés par nom de département, nom et prénom
+
+```
+SELECT DEPARTMENT_NAME, FIRST_NAME, LAST_NAME
+FROM EMPLOYEES e
+JOIN DEPARTMENTS d
+  ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+ORDER BY DEPARTMENT_NAME, LAST_NAME, FIRST_NAME;
+```
+
+### 3)
+
+Sélection first_name, last_name des employés de EMPLOYEES qui sont managers ordonnés par salaire + commission décroissant
+
+```
+SELECT FIRST_NAME, LAST_NAME
+FROM EMPLOYEES
+WHERE EMPLOYEE_ID IN (SELECT DISTINCT(MANAGER_ID) FROM EMPLOYEES)
+ORDER BY (SALARY+(SALARY*NVL(COMMISSION_PCT,0))) DESC;
+```
+
+## 6.2 Opérateurs ensemblistes
+
+### 1)
+
+Sélection de : first_name, last_name, salaire des employés de EMPLOYEES ayant le plus petit salaire ou le plus gros salaire
+
+> Pareil que 5.2.1
+
+### 2)
+
+Sélection pour les fonctions des employés ayant changés de fonctions de : nom, fonction, date début, date de fin le tout ordonné par nom, date début
+
+```
+SELECT e.LAST_NAME, j.JOB_TITLE, h.START_DATE, h.END_DATE
+FROM EMPLOYEES e
+INNER JOIN JOB_HISTORY h
+  ON e.EMPLOYEE_ID = h.EMPLOYEE_ID
+LEFT JOIN JOBS j
+  ON h.JOB_ID = j.JOB_ID
+ORDER BY e.LAST_NAME, h.START_DATE;
+```
+
+## 6.3
+
+### 1)
+
+Sélection de : level, nom, prénom de tous les employés de EMPLOYEES :
+
+```
+SELECT LEVEL, LAST_NAME, FIRST_NAME
+from employees
+-- On détermine le côté parent de la relation (le parent est employee_id)
+CONNECT BY PRIOR EMPLOYEE_ID = MANAGER_ID
+START WITH MANAGER_ID IS NULL;
+```
+
+### 2)
+
+Sélection de : nom prénom de tous les employés de EMPLOYEES sous forme d'une arborscence de type :
+Branche niveau 1
+... Branche niveau 1
+....... Feuille niveau 3
+....... Branche niveau 3
+
+```
+SET PAGESIZE 2000
+select
+  case level
+    when 1 then ''
+    when 2 then '... '
+    when 3 then '...... '
+    when 4 then '......... '
+    end
+  ||
+  last_name ||
+  first_name as "Employé"
+from employees
+connect by prior employee_id = manager_id
+start with manager_id is null;
+```
