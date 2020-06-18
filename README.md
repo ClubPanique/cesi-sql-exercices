@@ -216,7 +216,6 @@ Sélection pour chaque employé ayant une commission >= a 15%, le prénom et le 
 
 ```sql
 SELECT FIRST_NAME, LAST_NAME, UPPER(SUBSTR(FIRST_NAME, 0, 1) || SUBSTR(LAST_NAME, 0, 1) || SUBSTR(LAST_NAME, -1, 1)) AS TRIGRAMME FROM EMPLOYEES
-=======
 ```
 
 ### 19)
@@ -388,6 +387,8 @@ INNER JOIN EMPLOYEES M
 WHERE E.SALARY < 2500;
 ```
 
+ <hr/>
+
 # TP4 (Regroupements)
 
 ## 4.1 Requêtes de regroupement
@@ -531,6 +532,8 @@ HAVING c.COUNTRY_ID != 'US'
 ;
 ```
 
+ <hr/>
+
 # TP5 (Sous-requêtes)
 
 ## 5.1 Sous requête dans la clause WHERE
@@ -641,6 +644,8 @@ ON e.EMPLOYEE_ID = manager.MANAGER_ID
 ;
 ```
 
+ <hr/>
+ 
 # TP6 (Tris)
 
 ## 6.1
@@ -722,7 +727,7 @@ Branche niveau 1
 ....... Feuille niveau 3
 ....... Branche niveau 3
 
-```
+```sql
 SET PAGESIZE 2000
 select
   case level
